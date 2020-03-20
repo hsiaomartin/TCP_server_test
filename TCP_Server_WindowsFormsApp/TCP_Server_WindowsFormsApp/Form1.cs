@@ -11,6 +11,7 @@ namespace TCP_Server_WindowsFormsApp
     public partial class Form1 : Form
     {
         private delegate void ShowTD(String Str);
+        private delegate void ShowListbox(String Str,Boolean bl);
         private ShowTD ShowTextDele;
         private ChatServer CS = new ChatServer();
         Thread time_tick;
@@ -20,7 +21,7 @@ namespace TCP_Server_WindowsFormsApp
         // private ChatClient CC = new ChatClient();
         public Form1()
         {
-            CheckForIllegalCrossThreadCalls = false;
+            //CheckForIllegalCrossThreadCalls = false;
             CS.Start(this);
 
             try
@@ -41,12 +42,27 @@ namespace TCP_Server_WindowsFormsApp
             {
                 ShowText("連線錯誤!");
             }
-            time_toolStripStatusLabel.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+            
         }
 
 
         public void refreshRichBox(string userInfo,Boolean userExist)
         {
+
+
+            if (this.InvokeRequired)
+            {
+
+                this.BeginInvoke(new ShowListbox(refreshRichBox), userInfo, userExist);
+                return;
+            }
+            else
+            {
+                if (userExist)
+                    IP_listBox.Items.Add(userInfo);
+                else
+                    IP_listBox.Items.Remove(userInfo);
+            }
 
             //while (true)
             //{
@@ -59,11 +75,6 @@ namespace TCP_Server_WindowsFormsApp
             //if (myDebug)
             //    CS.serverSend("Hi\r\n");
             //ShowText(IPList);
-
-            if (userExist)
-                IP_listBox.Items.Add(userInfo);
-            else
-                IP_listBox.Items.Remove(userInfo);
             //Thread.Sleep(1000);
             //}
 
@@ -113,10 +124,12 @@ namespace TCP_Server_WindowsFormsApp
         private void show_time() {
             while (true)
             {
+                
                 CS.serverSend("Time " + DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
                // CC.Send("Time "+ DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss"));
                 Thread.Sleep(1000);
                 time_toolStripStatusLabel.Text = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+
             }
                 
         }
